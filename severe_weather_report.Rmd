@@ -56,3 +56,33 @@ Now we are left with 72869 observations.
 
 
 ## Cleaning The Data
+
+In the summary above is shown that the crop and property damage are broken in two columns for each, respectively, CROPDM, CROPDMEXP, PROPDM and PROPDMEXP. That breaks one of the tidy data principles and must be corrected. First, we are going to check the PROPDMGEXP and CROPDMGEXP. 
+```{r}
+table(df$PROPDMGEXP)
+table(df$CROPDMGEXP)
+```
+
+We here assume that K, M and B represent respectively 10<sup>3</sup>, 10<sup>6</sup> and 10<sup>9</sup> factors. Let's put it all together in a single column for each variable.
+
+```{r cache=TRUE}
+df$CROPAUX <- ifelse(df$CROPDMGEXP=="K",3,ifelse(df$CROPDMGEXP=="M",6,9))
+df$PROPAUX <- ifelse(df$PROPDMGEXP=="K",3,ifelse(df$PROPDMGEXP=="M",6,9))
+df$CROPDMG <- df$CROPDMG * 10 ^ df$CROPAUX
+df$PROPDMG <- df$PROPDMG * 10 ^ df$PROPAUX
+df <- df<-subset(df, select = c("BGN_DATE", "STATE","EVTYPE","FATALITIES","INJURIES","PROPDMG","CROPDMG"))
+```
+
+Now we are going to take a look in the event type variable, which is corresponded by the EVTYPE column. The event types must be as described in the [storm data documentation](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf)
+
+```{r}
+table(df$EVTYPE)
+```
+
+All of the events agree with the documentation list with the exception of the *LANDSLIDE* type. That difference is also explained in  the documentation and the description should be replaced by the *DEBRIS FLOW*.
+
+```{r}
+df$EVTYPE[df$EVTYPE=="LANDSLIDE"] <- "DEBRIS FLOW"
+```
+
+Now the data is tidy and we are ready to start the analysis.

@@ -104,3 +104,88 @@ Now we are left with 72869 observations.
 
 
 ## Cleaning The Data
+
+In the summary above is shown that the crop and property damage are broken in two columns for each, respectively, CROPDM, CROPDMEXP, PROPDM and PROPDMEXP. That breaks one of the tidy data principles and must be corrected. First, we are going to check the PROPDMGEXP and CROPDMGEXP. 
+
+```r
+table(df$PROPDMGEXP)
+```
+
+```
+## 
+##     B     K     M 
+##     9 70301  2559
+```
+
+```r
+table(df$CROPDMGEXP)
+```
+
+```
+## 
+##     K     M 
+## 72327   542
+```
+
+We here assume that K, M and B represent respectively 10<sup>3</sup>, 10<sup>6</sup> and 10<sup>9</sup> factors. Let's put it all together in a single column for each variable.
+
+
+```r
+df$CROPAUX <- ifelse(df$CROPDMGEXP=="K",3,ifelse(df$CROPDMGEXP=="M",6,9))
+df$PROPAUX <- ifelse(df$PROPDMGEXP=="K",3,ifelse(df$PROPDMGEXP=="M",6,9))
+df$CROPDMG <- df$CROPDMG * 10 ^ df$CROPAUX
+df$PROPDMG <- df$PROPDMG * 10 ^ df$PROPAUX
+df <- df<-subset(df, select = c("BGN_DATE", "STATE","EVTYPE","FATALITIES","INJURIES","PROPDMG","CROPDMG"))
+```
+
+Now we are going to take a look in the event type variable, which is corresponded by the EVTYPE column. The event types must be as described in the [storm data documentation](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf)
+
+
+```r
+table(df$EVTYPE)
+```
+
+```
+## 
+##    ASTRONOMICAL LOW TIDE                AVALANCHE                 BLIZZARD 
+##                        2                       91                       95 
+##            COASTAL FLOOD          COLD/WIND CHILL                DENSE FOG 
+##                       91                       80                       30 
+##              DENSE SMOKE                  DROUGHT               DUST DEVIL 
+##                        1                       86                       33 
+##               DUST STORM           EXCESSIVE HEAT  EXTREME COLD/WIND CHILL 
+##                       30                      107                       33 
+##              FLASH FLOOD                    FLOOD             FREEZING FOG 
+##                     7036                     4922                        7 
+##             FROST/FREEZE             FUNNEL CLOUD                     HAIL 
+##                       70                        4                     5907 
+##                     HEAT               HEAVY RAIN               HEAVY SNOW 
+##                      119                      366                      213 
+##                HIGH SURF                HIGH WIND                HURRICANE 
+##                       79                     2150                       28 
+##                ICE STORM         LAKE-EFFECT SNOW          LAKESHORE FLOOD 
+##                      190                      129                        2 
+##                LANDSLIDE                LIGHTNING              MARINE HAIL 
+##                       93                     3392                        2 
+##         MARINE HIGH WIND       MARINE STRONG WIND MARINE THUNDERSTORM WIND 
+##                        7                       35                       28 
+##              RIP CURRENT                   SEICHE         STORM SURGE/TIDE 
+##                      185                        3                       38 
+##              STRONG WIND        THUNDERSTORM WIND                  TORNADO 
+##                     2166                    39092                     4315 
+##      TROPICAL DEPRESSION           TROPICAL STORM                  TSUNAMI 
+##                        7                      226                       12 
+##               WATERSPOUT                 WILDFIRE             WINTER STORM 
+##                       10                      561                      472 
+##           WINTER WEATHER 
+##                      324
+```
+
+All of the events agree with the documentation list with the exception of the *LANDSLIDE* type. That difference is also explained in  the documentation and the description should be replaced by the *DEBRIS FLOW*.
+
+
+```r
+df$EVTYPE[df$EVTYPE=="LANDSLIDE"] <- "DEBRIS FLOW"
+```
+
+Now the data is tidy and we are ready to start the analysis.
