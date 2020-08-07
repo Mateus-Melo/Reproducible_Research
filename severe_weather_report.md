@@ -188,4 +188,153 @@ All of the events agree with the documentation list with the exception of the *L
 df$EVTYPE[df$EVTYPE=="LANDSLIDE"] <- "DEBRIS FLOW"
 ```
 
-Now the data is tidy and we are ready to start the analysis.
+
+## Results
+
+
+### Population Health Impact
+
+We start by looking for the events that were responsible for the largest numbers of fatalities and injuries.
+
+
+```r
+sort(tapply(df$FATALITIES,df$EVTYPE, sum, simplify = TRUE),decreasing = TRUE)[1:10]
+```
+
+```
+##           TORNADO       FLASH FLOOD              HEAT       RIP CURRENT 
+##               789               251               171               168 
+##             FLOOD         LIGHTNING THUNDERSTORM WIND    EXCESSIVE HEAT 
+##               148               132               121               113 
+##   COLD/WIND CHILL         AVALANCHE 
+##                90                72
+```
+
+```r
+sort(tapply(df$INJURIES,df$EVTYPE, sum, simplify = TRUE),decreasing = TRUE)[1:10]
+```
+
+```
+##           TORNADO THUNDERSTORM WIND    EXCESSIVE HEAT         LIGHTNING 
+##              9029              1301               879               827 
+##              HEAT          WILDFIRE    WINTER WEATHER       FLASH FLOOD 
+##               700               410               324               302 
+##             FLOOD              HAIL 
+##               167               156
+```
+
+
+
+```r
+tornadoes <- subset(df, EVTYPE == "TORNADO", select=c("BGN_DATE","FATALITIES", "INJURIES"))
+tornadoes_injuries_proportion <- sum(tornadoes$INJURIES)/sum(df$INJURIES)
+tornadoes_fatalities_proportion <- sum(tornadoes$FATALITIES)/sum(df$FATALITIES)
+print(tornadoes_injuries_proportion)
+```
+
+```
+## [1] 0.6024555
+```
+
+```r
+print(tornadoes_fatalities_proportion)
+```
+
+```
+## [1] 0.3310953
+```
+
+Tornadoes are, by far, the most harmful events to the population health, being responsible for more than 30% of the deaths and 60% of the injuries in a universe of more than 40 types of weather events.
+
+
+```r
+library(ggplot2)
+library(gridExtra)
+ggplot(data=tornadoes, aes(x=BGN_DATE)) + geom_point(aes(y=FATALITIES, colour="Fatalities")) + geom_line(aes(y=INJURIES, colour="Injuries")) + labs(x="Date", y="", title="Fatalities and Injuries by Tornadoes in The USA")
+```
+
+![](severe_weather_report_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
+
+As expected, the number of fatalities grows with the number of injuries. We have a very high peak of deaths and injuries in the year of 2011, more precisely on april, when occurred the [Super Outbreak](https://en.wikipedia.org/wiki/2011_Super_Outbreak), which is considered the largest tornado outbreak ever recorded.
+
+The Super Outbreak is clearly a rare event. In order to verify how the tornadoes affect the population health in regular basis, let's take a look on the data without the observations that occurred in 2011.
+
+
+```r
+dfWithout2011 <- subset(df, year(BGN_DATE)!=2011)
+sort(tapply(dfWithout2011$FATALITIES,dfWithout2011$EVTYPE, sum, simplify = TRUE),decreasing = TRUE)[1:10]
+```
+
+```
+##           TORNADO       FLASH FLOOD       RIP CURRENT              HEAT 
+##               202               183               139               108 
+##         LIGHTNING             FLOOD    EXCESSIVE HEAT   COLD/WIND CHILL 
+##               106                90                77                69 
+## THUNDERSTORM WIND         AVALANCHE 
+##                67                63
+```
+
+```r
+sort(tapply(dfWithout2011$INJURIES,dfWithout2011$EVTYPE, sum, simplify = TRUE),decreasing = TRUE)[1:10]
+```
+
+```
+##           TORNADO THUNDERSTORM WIND    EXCESSIVE HEAT         LIGHTNING 
+##              2866               928               741               633 
+##    WINTER WEATHER          WILDFIRE       FLASH FLOOD             FLOOD 
+##               324               294               272               157 
+##           TSUNAMI              HAIL 
+##               129               125
+```
+
+```r
+tornadoesWithout2011 <- subset(tornadoes, year(BGN_DATE)!=2011)
+tornadoes_injuries_proportion_w11 <- sum(tornadoesWithout2011$INJURIES)/sum(dfWithout2011$INJURIES)
+tornadoes_fatalities_proportion_w11 <- sum(tornadoesWithout2011$FATALITIES)/sum(dfWithout2011$FATALITIES)
+print(tornadoes_injuries_proportion_w11)
+```
+
+```
+## [1] 0.3983322
+```
+
+```r
+print(tornadoes_fatalities_proportion_w11)
+```
+
+```
+## [1] 0.1462708
+```
+
+Tornadoes are still number one in both fatalities and injuries, being responsible for almost 15% of the deaths and almost 40% of the injuries.
+
+### Economic Impact
+
+Similarly to the population health impact analysis, we start by looking for the events that were responsible for the largest numbers of crop and property damage.
+
+
+```r
+sort(tapply(df$CROPDMG,df$EVTYPE, sum, simplify = TRUE),decreasing = TRUE)[1:10]
+```
+
+```
+##             FLOOD              HAIL       FLASH FLOOD      FROST/FREEZE 
+##        2372542000         763870000         706002000         552772000 
+##           DROUGHT THUNDERSTORM WIND    TROPICAL STORM         HURRICANE 
+##         421939000         231958000         180921000         180510000 
+##           TORNADO         HIGH WIND 
+##         100237000          91522000
+```
+
+```r
+sort(tapply(df$PROPDMG,df$EVTYPE, sum, simplify = TRUE),decreasing = TRUE)[1:10]
+```
+
+```
+##             FLOOD           TORNADO              HAIL  STORM SURGE/TIDE 
+##       13643163800       13427223690        5782341200        4640643000 
+##       FLASH FLOOD THUNDERSTORM WIND         HURRICANE          WILDFIRE 
+##        4452702830        3262658790        2467600000        1594593470 
+##         HIGH WIND      WINTER STORM 
+##        1180707540         886270000
+```
