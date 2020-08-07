@@ -443,6 +443,8 @@ df$PROPAUX &lt;- ifelse(df$PROPDMGEXP==&quot;K&quot;,3,ifelse(df$PROPDMGEXP==&qu
 df$CROPDMG &lt;- df$CROPDMG * 10 ^ df$CROPAUX
 df$PROPDMG &lt;- df$PROPDMG * 10 ^ df$PROPAUX
 df &lt;- df&lt;-subset(df, select = c(&quot;BGN_DATE&quot;, &quot;STATE&quot;,&quot;EVTYPE&quot;,&quot;FATALITIES&quot;,&quot;INJURIES&quot;,&quot;PROPDMG&quot;,&quot;CROPDMG&quot;))</code></pre>
+<p>Since we are going to analyze the economic impact, it is interesting to add the property and crop damage together.</p>
+<pre class="r"><code>df$TOTALDMG &lt;- df$PROPDMG + df$CROPDMG</code></pre>
 <p>Now we are going to take a look in the event type variable, which is corresponded by the EVTYPE column. The event types must be as described in the <a href="https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf">storm data documentation</a></p>
 <pre class="r"><code>table(df$EVTYPE)</code></pre>
 <pre><code>## 

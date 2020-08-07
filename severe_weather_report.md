@@ -138,6 +138,13 @@ df$PROPDMG <- df$PROPDMG * 10 ^ df$PROPAUX
 df <- df<-subset(df, select = c("BGN_DATE", "STATE","EVTYPE","FATALITIES","INJURIES","PROPDMG","CROPDMG"))
 ```
 
+Since we are going to analyze the economic impact, it is interesting to add the property and crop damage together.
+
+
+```r
+df$TOTALDMG <- df$PROPDMG + df$CROPDMG
+```
+
 Now we are going to take a look in the event type variable, which is corresponded by the EVTYPE column. The event types must be as described in the [storm data documentation](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf)
 
 
@@ -253,7 +260,7 @@ library(gridExtra)
 ggplot(data=tornadoes, aes(x=BGN_DATE)) + geom_point(aes(y=FATALITIES, colour="Fatalities")) + geom_line(aes(y=INJURIES, colour="Injuries")) + labs(x="Date", y="", title="Fatalities and Injuries by Tornadoes in The USA")
 ```
 
-![](severe_weather_report_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
+![](severe_weather_report_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
 
 As expected, the number of fatalities grows with the number of injuries. We have a very high peak of deaths and injuries in the year of 2011, more precisely on april, when occurred the [Super Outbreak](https://en.wikipedia.org/wiki/2011_Super_Outbreak), which is considered the largest tornado outbreak ever recorded.
 

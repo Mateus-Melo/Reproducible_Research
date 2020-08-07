@@ -73,6 +73,12 @@ df$PROPDMG <- df$PROPDMG * 10 ^ df$PROPAUX
 df <- df<-subset(df, select = c("BGN_DATE", "STATE","EVTYPE","FATALITIES","INJURIES","PROPDMG","CROPDMG"))
 ```
 
+Since we are going to analyze the economic impact, it is interesting to add the property and crop damage together.
+
+```{r cache=TRUE}
+df$TOTALDMG <- df$PROPDMG + df$CROPDMG
+```
+
 Now we are going to take a look in the event type variable, which is corresponded by the EVTYPE column. The event types must be as described in the [storm data documentation](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf)
 
 ```{r}
